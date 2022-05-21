@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<body>
+<div id="stuff">
+username: <input type="text" id="username" placeholder="channelname">
+oauth: <input type="password" id="oauth" placeholder="oauth:...">
+channel: <input type="text" id="channel" placeholder="channelname">
+<input type="submit" value="submit" id="submit">
+</div>
+<style>
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+img {
+  top: 0;
+  left: 0;
+  opacity: 1;
+  transition: top 4s, left 4s, opacity 4s;
+  position: absolute;
+}
+.c { position: relative; }
+.u { top: -20vh; }
+.d { top: 20vh; }
+.l { left: -20vw; }
+.r { left: 20vw; }
+.a { opacity: .01; }
+</style>
+<script id="bootstrap">
+(() => {
+  document.getElementById('submit').addEventListener('click', () => {
+    let username = document.getElementById('username').value;
+    let oauth = document.getElementById('oauth').value;
+    let channel = document.getElementById('channel').value;
+
+    document.body.removeChild(document.getElementById('stuff'));
+    document.body.removeChild(document.getElementById('bootstrap'));
+
+    let uInput = document.createElement('input')
+    uInput.id = 'u';
+    uInput.type = 'hidden';
+    uInput.value = username;
+    let oInput = document.createElement('input')
+    oInput.id = 'o';
+    oInput.type = 'hidden';
+    oInput.value = oauth;
+    let cInput = document.createElement('input');
+    cInput.id = 'c';
+    cInput.type = 'hidden';
+    cInput.value = channel;
+    document.body.prepend(uInput);
+    document.body.prepend(oInput);
+    document.body.prepend(cInput);
+
+    let url = document.createTextNode(`data:text/html;base64,${btoa(document.body.innerHTML)}`);
+    let directions = document.createElement('div')
+    directions.innerText = 'copy paste this url to a browser source:'
+    directions.style.marginBottom = '1em';
+
+    document.body.appendChild(directions);
+    document.body.appendChild(url);
+  });
+})();
+</script>
+<script>
+(() => {
+  let ds = [['r'], ['r', 'd'], ['d'], ['d', 'l'], ['l'], ['l', 'u'], ['u'], ['u', 'r']];
+  let uV = window?.u?.value;
+  let oV = window?.o?.value;
+  let cV = window?.c?.value;
+  if (uV && oV && cV) {
+    let g = () => {
+      let s = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+      s.addEventListener('close', () => setTimeout(g, 100));
+      s.addEventListener('error', () => setTimeout(g, 100));
+      s.addEventListener('open', () => {
+        s.send('CAP REQ :twitch.tv/tags');
+        s.send(`PASS ${oV}`);
+        s.send(`NICK ${uV}`);
+        s.send(`JOIN #${cV}`);
+      });
+      s.addEventListener('message', (e) => {
+        if (e.data.startsWith('PING ')) {
+          s.send(`PONG ${e.data.slice(5, e.data.length - 2)}`);
+        }
+        console.log({d:e.data})
+        let m = /emotes=([^;]+);/.exec(e.data);
+        if (m) {
+          m[1].split('/').forEach((s) => {
+            let p = s.split(':')
+            let c = p[1].split(',').length;
+            for (let i = 0; i < c; i += 1) {
+              let c = document.createElement('div');
+              c.classList.add('c')
+              c.style.top = `${20 + Math.random() * 60}vh`
+              c.style.left = `${20 + Math.random() * 60}vw`
+              let im = document.createElement('img');
+              im.src = `https://static-cdn.jtvnw.net/emoticons/v2/${p[0]}/default/dark/2.0`;
+              let cls = ds[Math.floor(Math.random() * ds.length)]
+              setTimeout(() => im.classList.add('a', ...cls), 100);
+              setTimeout(() => document.body.removeChild(c), 4100);
+              c.appendChild(im);
+              document.body.appendChild(c);
+            }
+          });
+        }
+      });
+    }
+    g();
+  }
+})();
+</script>
+</body>
+</html>
