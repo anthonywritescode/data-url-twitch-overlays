@@ -5,6 +5,15 @@
 
   let reEscape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+  let parseInfo = (infoS) => {
+    let info = {};
+    for (let part of infoS.split(';')) {
+      let [k, ...v] = part.split('=');
+      info[k] = v.join('=');
+    }
+    return info;
+  };
+
   let ME_PREFIX = '\x01ACTION ';
 
   let uV = u.value;
@@ -75,7 +84,7 @@
     s.addEventListener('close', () => setTimeout(g, 100));
     s.addEventListener('error', () => setTimeout(g, 100));
     s.addEventListener('open', () => {
-      s.send('CAP REQ :twitch.tv/tags');
+      s.send('CAP REQ :twitch.tv/commands twitch.tv/tags');
       s.send(`PASS ${oV}`);
       s.send(`NICK ${uV}`);
       s.send(`JOIN #${cV}`);
@@ -84,19 +93,35 @@
       if (e.data.startsWith('PING ')) {
         s.send(`PONG ${e.data.slice(5, e.data.length - 2)}`);
       }
-      let m = /^@([^ ]+) :[^!]+.* PRIVMSG #[^ ]+ :(.+)\r\n$/.exec(e.data);
-      if (m) {
-        let [, infoS, s] = m;
+      let clearMsg = /^@([^ ]+) :[^!]+.* CLEARMSG #[^ ]+ :.+\r\n$/.exec(e.data);
+      if (clearMsg) {
+        let [, infoS] = clearMsg;
+
+        let info = parseInfo(infoS);
+        for (let el of document.querySelectorAll(`.msg-${info['target-msg-id']}`)) {
+          el.parentNode.removeChild(el);
+        }
+      }
+
+      let clearChat = /^@([^ ]+) :[^!]+.* CLEARCHAT #[^ ]+ :.+\r\n$/.exec(e.data);
+      if (clearChat) {
+        let [, infoS] = clearChat;
+
+        let info = parseInfo(infoS);
+        for (let el of document.querySelectorAll(`.user-${info['target-user-id']}`)) {
+          el.parentNode.removeChild(el);
+        }
+      }
+
+      let chat = /^@([^ ]+) :[^!]+.* PRIVMSG #[^ ]+ :(.+)\r\n$/.exec(e.data);
+      if (chat) {
+        let [, infoS, s] = chat;
+
+        let info = parseInfo(infoS);
 
         let isMe = s.startsWith(ME_PREFIX);
         if (isMe) {
           s = s.slice(ME_PREFIX.length, -1);
-        }
-
-        let info = {};
-        for (let part of infoS.split(';')) {
-          let [k, ...v] = part.split('=');
-          info[k] = v.join('=');
         }
 
         let color;
@@ -125,7 +150,7 @@
         emotes.sort((a, b) => a[0] - b[0]);
 
         let msg = document.createElement('div')
-        msg.classList.add('message');
+        msg.classList.add('message', `msg-${info.id}`, `user-${info['user-id']}`);
 
         if (info.badges) {
           for (let badge of info.badges.split(',')) {
