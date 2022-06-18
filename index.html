@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<form>
+<label>username: <input type="text" id="username" required placeholder="channelname"></label>
+<label>oauth: <input type="password" id="oauth" required placeholder="oauth:..."></label>
+<label>channel: <input type="text" id="channel" required placeholder="channelname"></label>
+<label><input type="checkbox" id="remember">remember?</label>
+<div><input type="submit" value="submit"></div>
+</form>
+<script>
+(() => {
+  let KEY = 'overlay-creds';
+  let uE = document.getElementById('username');
+  let oE = document.getElementById('oauth');
+  let cE = document.getElementById('channel');
+  let rE = document.getElementById('remember');
+
+  let d = localStorage.getItem(KEY);
+  if (d) {
+    let data = JSON.parse(d);
+    uE.value = data.username;
+    oE.value = data.oauth;
+    cE.value = data.channel;
+    rE.checked = true;
+  }
+
+  let form = document.querySelector('form');
+  form.addEventListener('submit', async () => {
+    let username = uE.value;
+    let oauth = oE.value;
+    let channel = cE.value;
+    let remember = rE.checked;
+
+    if (remember) {
+      localStorage.setItem(KEY, JSON.stringify({username, oauth, channel}));
+    } else {
+      localStorage.removeItem(KEY);
+    }
+
+    document.body.removeChild(form);
+
+    let css = await (await fetch('overlays/chat/main.css')).text();
+    let js = await (await fetch('overlays/chat/main.js')).text();
+
+    let input = (k, v) => {
+        let ret = document.createElement('input');
+        ret.type = 'hidden';
+        ret.id = k;
+        ret.value = v;
+        return ret.outerHTML;
+    };
+
+    let html = `
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><style>${css}</style></head>
+<body>
+${input('u', username)}
+${input('c', channel)}
+${input('o', oauth)}
+<script>${js}</scrip${'t'}>
+</body>
+</html>
+`;
+
+    let url = document.createTextNode(`data:text/html;base64,${btoa(html)}`);
+    let directions = document.createElement('div')
+    directions.innerText = 'copy paste this url to a browser source:'
+    directions.style.marginBottom = '1em';
+
+    document.body.appendChild(directions);
+    document.body.appendChild(url);
+  });
+})();
+</script>
+</body>
+</html>
