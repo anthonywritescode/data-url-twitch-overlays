@@ -16,9 +16,9 @@
 
   let ME_PREFIX = '\x01ACTION ';
 
-  let uV = u.value;
-  let oV = o.value;
-  let cV = c.value;
+  let uV = document.getElementById('u').value;
+  let oV = document.getElementById('o').value;
+  let cV = document.getElementById('c').value;
 
   let badgeUrls = {};
   let updateBadges = (j) => {
