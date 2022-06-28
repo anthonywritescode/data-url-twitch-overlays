@@ -227,7 +227,7 @@
 
         let pos = 0;
         for (let [start, end, emote] of emotes) {
-          doCheers(s.slice(pos, start));
+          doCheers([...s].slice(pos, start).join(''));
 
           let emoteImg = document.createElement('img');
           emoteImg.classList.add('emote');
@@ -236,7 +236,7 @@
 
           pos = end + 1;
         }
-        doCheers(s.slice(pos));
+        doCheers([...s].slice(pos).join(''));
 
         msg.append(msgText);
 
