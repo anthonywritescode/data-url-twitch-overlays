@@ -92,8 +92,8 @@
         localStorage.removeItem(KEY);
       }
 
-      let css = await (await fetch(`overlays/${type}/main.css`)).text();
-      let js = await (await fetch(`overlays/${type}/main.js`)).text();
+      let css = await (await fetch(`overlays/${type}/main.css?${+Date.now()}`)).text();
+      let js = await (await fetch(`overlays/${type}/main.js?${+Date.now()}`)).text();
 
       let input = (k, v) => {
           let ret = document.createElement('input');
