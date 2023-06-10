@@ -22,24 +22,24 @@
 
   let badgeUrls = {};
   let updateBadges = (j) => {
-    for (let [badge, v] of Object.entries(j.badge_sets)) {
-      for (let [version, dct] of Object.entries(v.versions)) {
-        badgeUrls[`${badge}/${version}`] = dct.image_url_2x;
+    for (let v of j.data) {
+      for (let dct of v.versions) {
+        badgeUrls[`${v.set_id}/${dct.id}`] = dct.image_url_2x;
       }
     }
   };
 
-  let globalResp = await fetch('https://badges.twitch.tv/v1/badges/global/display');
-  updateBadges(await globalResp.json());
   let opts = {
     headers: {
       'Authorization': `Bearer ${oV.split(':')[1]}`,
       'Client-Id': 'q6batx0epp608isickayubi39itsckt',
     }
   };
+  let globalResp = await fetch('https://api.twitch.tv/helix/chat/badges/global', opts);
+  updateBadges(await globalResp.json());
   let userResp = await fetch(`https://api.twitch.tv/helix/users?login=${cV}`, opts);
   let userId = (await userResp.json()).data[0].id;
-  let perChannelResp = await fetch(`https://badges.twitch.tv/v1/badges/channels/${userId}/display`, opts);
+  let perChannelResp = await fetch(`https://api.twitch.tv/helix/chat/badges?broadcaster_id=${userId}`, opts);
   updateBadges(await perChannelResp.json());
 
   let bttv = {};
