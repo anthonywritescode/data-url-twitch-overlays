@@ -31,6 +31,9 @@ body, html {
   height: 35px;
   vertical-align: bottom;
 }
+.emote-big {
+  height: 112px;
+}
 .cheer {
   font-weight: bold;
 }

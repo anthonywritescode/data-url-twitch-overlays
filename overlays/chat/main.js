@@ -143,11 +143,14 @@
             let [emote, positions] = part.split(':');
             for (let pos of positions.split(',')) {
               let [start, end] = pos.split('-');
-              emotes.push([parseInt(start, 10), parseInt(end, 10), emote]);
+              emotes.push([parseInt(start, 10), parseInt(end, 10), emote, false]);
             }
           }
         }
         emotes.sort((a, b) => a[0] - b[0]);
+        if (info['msg-id'] === 'gigantified-emote-message') {
+            emotes[emotes.length - 1][3] = true;
+        }
 
         let msg = document.createElement('div')
         msg.classList.add('message', `msg-${info.id}`, `user-${info['user-id']}`);
@@ -226,12 +229,19 @@
         }
 
         let pos = 0;
-        for (let [start, end, emote] of emotes) {
+        for (let [start, end, emote, big] of emotes) {
           doCheers([...s].slice(pos, start).join(''));
+
+          if (big) {
+            msgText.appendChild(document.createElement('br'));
+          }
 
           let emoteImg = document.createElement('img');
           emoteImg.classList.add('emote');
-          emoteImg.src = `https://static-cdn.jtvnw.net/emoticons/v2/${emote}/default/dark/2.0`;
+          if (big) {
+            emoteImg.classList.add('emote-big');
+          }
+          emoteImg.src = `https://static-cdn.jtvnw.net/emoticons/v2/${emote}/default/dark/3.0`;
           msgText.appendChild(emoteImg);
 
           pos = end + 1;
