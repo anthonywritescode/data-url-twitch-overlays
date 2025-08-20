@@ -32,7 +32,7 @@
   let opts = {
     headers: {
       'Authorization': `Bearer ${oV.split(':')[1]}`,
-      'Client-Id': 'q6batx0epp608isickayubi39itsckt',
+      'Client-Id': 'gp762nuuoqcoxypju8c569th9wz7q5',
     }
   };
   let globalResp = await fetch('https://api.twitch.tv/helix/chat/badges/global', opts);
