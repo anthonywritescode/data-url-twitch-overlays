@@ -17,7 +17,7 @@
   let ME_PREFIX = '\x01ACTION ';
 
   let uV = document.getElementById('u').value;
-  let oV = document.getElementById('o').value;
+  let oV = "oauth:" + document.getElementById('o').value;
   let cV = document.getElementById('c').value;
 
   let badgeUrls = {};
